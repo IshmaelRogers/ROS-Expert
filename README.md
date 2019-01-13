@@ -36,8 +36,56 @@ $ cmake packageToBuild/
 $ make
 
 ```
+2. Use *catkin_make* command to compile all the packages 
 
+```
+$ cd workspace
+$ catkin_make
 
+```
+
+NOTE: Both commands build the executable in the build apace directory configured in ROS
+
+Packages
+--
+Typical packages structure ROS include the following
+
+* include/package_name/: This directory includes the headers of the libraries that you would need.
+* msg/: If you develop nonstandard messages, put them here.
+* scripts/: These are executable scripts that can be in Bash, Python, or any other scripting language.
+* src/: This is where the source files of your programs are present. You can create a folder for nodes and nodelets or organize it as you want.
+* srv/: This represents the service (srv) types.
+* CMakeLists.txt: This is the CMake build file. 
+* package.xml: This is the package manifest.
+
+To create, modify or work with packages, ROS uses the following tools:
+
+* rospack: This command is used to get information or find packages in the system.
+* catkin_create_pkg: This command is used when you want to create a new package.
+* catkin_make: This command is used to compile a workspace
+* rosdep: This command installs the system dependencies of a package.
+* rqt_dep: This command is used to see the package dependencies as a graph. If you want to see the package dependencies as a graph, you will find a plugin called package graph in rqt. Select a package and see the dependencies.
+
+To move between packages and their folders and files, ROS comes with the *rosbash* package. It provides commands that are similar to Linux commands:
+
+* roscd: This command helps us change the directory. This is similar to the cd command in Linux.
+* rosed: This command is used to edit a file.
+* roscp: This command is used to copy a file from a package.
+* rosd: This command lists the directories of a package.
+* rosls: This command lists the files from a package. This is similar to the ls command in Linux.
+
+NOTE: Every package must contain a package.xml file that is used to specify information about the package. 
+
+Two typical tags that are used in the package.xml file are 
+1. * <build_depend> * 
+2. * <run_depend> *
+
+* <build_depend> * 
+
+shows which package must be installed before installing the current package.
+
+* <run_depend> *
+shows what packages are necessary for running the code of the package
 
 The Computation Graph level - Where the communication process and systems happen. How ROS:
 ---
