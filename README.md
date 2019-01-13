@@ -11,8 +11,8 @@ a. Packages - Contain the minimum structure and content to create a program with
 b. Package manifests - Provide information about a package, licenses, dependencies, compilation flags. It is managed with the *package.xml* file
 c. Metapackages - Is used to aggregate several packages in a group. (navigation stack)
 d. Metapackage manifests - Similat to normal packages except thaey contain an export tag in XML.
-e. Message types - a message is the information that a process sends to other process. Message descriptions are stored in * my_package/msg/MyMessageType.msg *
-f. Service types - define the request and response data structures for services provided by each process in ROS. Service types are store in * my_package/srv/MyServiceType.srv *
+e. Message types - a message is the information that a process sends to other process. Message descriptions are stored in *my_package/msg/MyMessageType.msg*
+f. Service types - define the request and response data structures for services provided by each process in ROS. Service types are store in *my_package/srv/MyServiceType.srv*
 
 The workspace
 ---
@@ -77,14 +77,14 @@ To move between packages and their folders and files, ROS comes with the *rosbas
 NOTE: Every package must contain a package.xml file that is used to specify information about the package. 
 
 Two typical tags that are used in the package.xml file are 
-1. * <build_depend> * 
-2. * <run_depend> *
+1. *<build_depend>* 
+2. *<run_depend>*
 
-* <build_depend> * 
+*<build_depend>* 
 
 shows which package must be installed before installing the current package.
 
-* <run_depend> *
+*<run_depend>*
 shows what packages are necessary for running the code of the package
 
 The Computation Graph level - Where the communication process and systems happen. How ROS:
