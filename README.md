@@ -1,3 +1,12 @@
+# Ishmael Rogers
+# Robotics Software Engineer
+# Building Robots With ROS
+# Infinitely Deep Robotics Group, LLC
+# 2019
+
+
+
+
 ROS Architecture 
 
 The ROS architecture has been designed and divided into three sections or levels of concepts:
