@@ -114,3 +114,117 @@ The structure of the file aboce is divided into two parts
 
 [The empty_world](https://github.com/ros-simulation/gazebo_ros_pkgs/blob/kinetic-devel/gazebo_ros/launch/empty_world.launch) file includes a set of important definitions that are inherited by the world that we create. Using the world_name argument and the path to your .world file passed as the value to that argument, you will be able to launch your world in Gazebo.
 
+
+Launch the Gazebo environment 
+--
+
+``` bash
+$ cd /home/workspace/catkin_ws/
+$ catkin_make
+$ source devel/setup.bash
+$ roslaunch hexapod0 hexapod0_world.launch
+```
+
+Be sure to explore these links for more insight 
+
+[The SDF format for Gazebo from OSRF](http://osrf-distributions.s3.amazonaws.com/sdformat/api/dev.html)
+[A general guide to the SDF format](http://sdformat.org/spec?ver=1.6&elem=sdf)
+
+# Robot Modeling 
+
+Robot URDF
+---
+
+Now we will create [The universal description file](https://classroom.udacity.com/nanodegrees/nd209/parts/c199593e-1e9a-4830-8e29-2c86f70f489e/modules/8855de3f-2897-46c3-a805-628b5ecf045b/lessons/91d017b1-4493-4522-ad52-04a74a01094c/concepts/304b7bc0-6fe8-4614-bd09-4a545665adad) from scratch.
+
+1. Create a new folder in the package directory and an empty xacro file for the robot's URDF description.
+
+``` bash
+$ cd /home/workspace/catkin_ws/src/hexapod0/
+$ mkdir urdf
+$ cd urdf
+$ nano hexapod0.xacro
+```
+
+In this basic model we will create a cubidal base with two caser wheels. We now copy the following code into the ``hexapod0.xacro `` file.
+
+``` xacro
+<?xml version='1.0'?>
+
+<robot name="udacity_bot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <link name="robot_footprint"></link>
+
+  <joint name="robot_footprint_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="robot_footprint"/>
+    <child link="chassis" />
+  </joint>
+
+  <link name='chassis'>
+    <pose>0 0 0.1 0 0 0</pose>
+
+    <inertial>
+      <mass value="15.0"/>
+      <origin xyz="0.0 0 0" rpy=" 0 0 0"/>
+      <inertia
+          ixx="0.1" ixy="0" ixz="0"
+          iyy="0.1" iyz="0"
+          izz="0.1"
+      />
+    </inertial>
+
+    <collision name='collision'>
+      <origin xyz="0 0 0" rpy=" 0 0 0"/> 
+      <geometry>
+        <box size=".4 .2 .1"/>
+      </geometry>
+    </collision>
+
+    <visual name='chassis_visual'>
+      <origin xyz="0 0 0" rpy=" 0 0 0"/>
+      <geometry>
+        <box size=".4 .2 .1"/>
+      </geometry>
+    </visual>
+
+
+    <collision name='back_caster_collision'>
+      <origin xyz="-0.15 0 -0.05" rpy=" 0 0 0"/>
+      <geometry>
+        <sphere radius="0.0499"/>
+      </geometry>
+    </collision>
+
+    <visual name='back_caster_visual'>
+      <origin xyz="-0.15 0 -0.05" rpy=" 0 0 0"/>
+      <geometry>
+        <sphere radius="0.05"/>
+      </geometry>
+    </visual>
+
+    <collision name='front_caster_collision'>
+      <origin xyz="0.15 0 -0.05" rpy=" 0 0 0"/>
+      <geometry>
+        <sphere radius="0.0499"/>
+      </geometry>
+    </collision>
+
+    <visual name='front_caster_visual'>
+      <origin xyz="0.15 0 -0.05" rpy=" 0 0 0"/>
+      <geometry>
+        <sphere radius="0.05"/>
+      </geometry>
+    </visual>
+
+  </link>
+
+</robot>
+
+```
+
+
+
+
+
+
