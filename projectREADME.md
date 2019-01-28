@@ -56,3 +56,13 @@ Add the following to hexapod0.world
 </sdf>
 
 ```
+
+
+The ```.world ``` file uses the XML file format to describe all the elements that are being defined with respect to the Gazebo environment. The simple world that you are creating above, has the following elements
+
+
+* ```<sdf>```: The base element which encapsulates the entire file structure and content.
+  
+*`` <world>``: The world element defines the world description and several properties pertaining to that world. In this example, you are adding a ground plane, a light source, and a camera to your world. Each model or property can have further elements that describe it better. For example, the ```camera``` has a ``pose`` element which defines its position and orientation.
+  
+* ```<include>```: The include element, along with the ``<uri>`` element, provide a path to a particular model. In Gazebo there are several models that are included by default, and you can include them in creating your environment.
