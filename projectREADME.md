@@ -151,7 +151,7 @@ In this basic model we will create a cubidal base with two caser wheels. We now 
 ``` xacro
 <?xml version='1.0'?>
 
-<robot name="udacity_bot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot name="hexapod0" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <link name="robot_footprint"></link>
 
