@@ -461,11 +461,124 @@ Modify the robot description file
 ```
 $ cd /home/catkin_ws/src/hexapod0/launch/
 $ nano robot_description.launch
+```
+
+Now we add two `nodes`  to launch file after the first "param" definition: 
+
+```
+<!-- Send fake joint values-->
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+    <param name="use_gui" value="false"/>
+  </node>
+
+<!-- Send robot states to tf -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false" output="screen"/>
+```
+One of these nodes uses `joint_state_publisher` that publishes joint state messages for the robot such as the angles for the non-fixed joints. The other node uses the `robot_state_publisher` package that publishes the robot's state to `tf` (transformation tree). The robot model has several frames corresponding to each link/joint. The `robot_state_publisher` publishes the 3D poses of these links. 
+
+
+Modify the hexapod0_world launch file
+---
+
+We'll launch Rviz along with Gazebo
+
+``
+$ nano hexapod0_world.launch 
 ``
 
+Next, we add a node at the end of the file after the `urdf_spawner` node definition. This node launches the `rviz` package.
+
+``
+<!--launch rviz-->
+<node name="rviz" pkg="rviz" type="rviz" respawn="false"/>
+
+``
+
+Launching it
+---
+
+The following command will launch both Gazebo and RViz.  
 
 
+```
+$ cd /home/catkin_ws/
+$ roslaunch hexapod0 hexapod0_world.launch
+```
 
+We'll now navigate to the RViz Window and on the left side, under `Displays`:
+
+Select “odom” for fixed frame
+Click the “Add” button and
+add “RobotModel”
+add “Camera” and select the Image topic that was defined in the camera gazebo plugin
+add “LaserScan” and select the topic that was defined in the hokuyo gazebo plugin. 
+
+The robot model should appear in RViz. 
+
+Now we navigate to to Gazebo and click on "insert" and add any item in the world in front of the robot. The item should be visible in the RViz in the "Camera" viewer and the Laser scan of that object.
+
+Lets publish messages to cmd_vel, a topic which was defined in the drive controller plugin. We'll set the values for linear.x and angular.z to enable the robot to start moving in a circle. 
+
+
+```
+rostopic pub /cmd_vel geometry_msgs/Twist  "linear:
+  x: 0.1
+  y: 0.0
+  z: 0.0
+angular:
+  x: 0.0
+  y: 0.0
+  z: 0.1" 
+  ```
+ NOTE: For the above command if we enter `geometry_msg/Twist`, pressing Tab twice will complete the message definition so that the required values can be changed. 
+ 
+ Challenge: Incorporate the [teleop package](https://classroom.udacity.com/nanodegrees/nd209/parts/dad7b7cc-9cce-4be4-876e-30935216c8fa/modules/f5048868-4bd8-4e8d-8c6b-69bd559ed9db/lessons/72cae9de-deae-4579-93da-7e56bd5021fc/concepts/3ad78b60-f8b6-494c-afd5-f03de3dcfa3c) to drive the the robot around.
+ 
+ 
+ # Localization map 
+ 
+ Adding a map
+ ---
+ 
+ We will now launch the robot in a new environment created by Clearpath Robotics. Let's first create a new folder in the package directory 
+ 
+ ``
+$ cd /home/catkin_ws/src/hexapod0/
+$ mkdir maps
+$ cd maps
+
+``
+We'll `jackal_race.pgm` and `jackal_race.yaml` from the project [repo](https://github.com/udacity/RoboND-Localization-Project/tree/master/maps) into the maps folder.
+
+NOTE: do not open the `.pgm` file because it is large and may make the system freeze
+
+We now revist the empty Gazebo world, called `hexapod0.world`. The map that we will be working with is generated based on its own world.
+
+``
+$ cd ..
+$ cd worlds
+
+``
+
+Let's modify the ``hexapod0_world.launch`` file and update the path to this new map/world
+
+`` 
+$ cd .. 
+$ cd launch/
+$ nano hexapod0_world.launch
+``
+
+Modify the ``world_name`` argument so that it points to `jackal_race.world`. Now we launch the robot in the new map.
+
+``
+$ cd /home/catkin_ws/
+$ roslaunch hexapod0 hexapod0_world.launch 
+``
+
+Note: As of this step, you won’t see the map in RViz.
+
+Localization: Adaptive Monte Carlo Localization Package 
+
+This modification to the [Monte Carlo Localization]()
 
   
-
