@@ -439,6 +439,29 @@ Run the launch file to test the model
 $ roslaunch hexapod0 hexapod.launch
 ```
 
+# RViz Integration
+
+Gazebo is a very useful physic simulator that gives us access to models and objects that can be likely found in the real world. [RViz](https://classroom.udacity.com/nanodegrees/nd209/parts/c199593e-1e9a-4830-8e29-2c86f70f489e/modules/8855de3f-2897-46c3-a805-628b5ecf045b/lessons/91d017b1-4493-4522-ad52-04a74a01094c/concepts/809ef993-dbbb-49d4-8520-0bae34921a60) is a useful tool that can visualize any type of sensor data being published over a ROS topic:
+
+1. Camera images
+2. Point clouds 
+3. Lidar Data
+
+The data can be a live stream that is measured directly from the sensor or some pre-recorded data stored as a bag file. In general, we will use RViz as a one-stop tool for visualizing all three core aspects of robotics: 
+
+1. Perception
+2. Decision making
+3. Actuation 
+
+Let's start by intergrating the model into RViz and visualize data from the camera and laser sensors
+
+Modify the robot description file
+---
+
+```
+$ cd /home/catkin_ws/src/hexapod0/launch/
+$ nano robot_description.launch
+``
 
 
 
