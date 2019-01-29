@@ -81,7 +81,7 @@ $ nano hexapod0_world.launch
 ```
 Add the following to the launch file:
 
-``` XML 
+``` xml
 
 <?xml version="1.0" encoding="UTF-8"?>
 
@@ -222,7 +222,41 @@ In this basic model we will create a cubidal base with two caser wheels. We now 
 </robot>
 
 ```
+In the code above we create a single link the ```name``` "chassis" that contains the base and (caster) wheels of the robot. Each link has a specific elements such as ``inertial`` or ``collision`` elements. We'll revisit [previous lessons](https://classroom.udacity.com/nanodegrees/nd209/parts/c199593e-1e9a-4830-8e29-2c86f70f489e/modules/8855de3f-2897-46c3-a805-628b5ecf045b/lessons/91d017b1-4493-4522-ad52-04a74a01094c/concepts/304b7bc0-6fe8-4614-bd09-4a545665adad) to get a more in depth overview of these elements. 
 
+The chassis in this example is cuboidal. The wheels are spherical. These geometric properties are denoted by the ``<geometry>`` tags. Each link, or link has an origin, or pose that must be defined as well. Every element of that link or joint has its own origin which is defined relative to the link's frame of reference. 
+
+The caster wheels in this example are attached directly to the base. Therefore there is no need for any additional links to define the casters. As such, there are no joints to connect them. The caster have ```friction``` coefficients associated with them, but are set to 0 in this example to allow for free motion while moving. 
+
+
+Launch the Model
+---
+
+In order to launch our newly created robot we will need to create a new launch file that will help load the URDF file 
+
+``` $ cd /home/catkin_ws/src/hexapod0/launch
+    $ nano robot_decription.launch
+```
+
+The following code needs to be copied into the ```robot_desrcription.launch``` file in order to define a parameter called ``robot description`` which is used to set a single command use the [xacro package](http://wiki.ros.org/urdf/Tutorials/Using%20Xacro%20to%20Clean%20Up%20a%20URDF%20File) to generate the URDF from the xacro file.
+
+``` xml
+<?xml version="1.0"?>
+<launch>
+
+  <!-- send urdf to param server -->
+  <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find udacity_bot)/urdf/udacity_bot.xacro'" />
+
+</launch>
+``` 
+
+Inside the ``launch`` folder we need to update ```hexapod0_world.launch``` so that Gazebo can load the UDRF
+
+``` xml $ nano hexapod0_world.launch ```
+
+Add the following to the launch file after ```<launch>```
+
+``` xml <include file = "$(find hexapod0)/launch/robot_description.launch"/> ```
 
 
 
