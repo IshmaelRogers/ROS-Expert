@@ -1,3 +1,16 @@
+# Ishmael Rogers
+# Robotics Software Engineer
+# Infinitely Deep Robotics Group
+# 2019
+
+
+[images1]: ./images/costmaps.png
+[images2]: ./images/rviz-robot-initial-posearray-small.png
+[images3]: ./images/rviz-nav-goal-small.png 
+[images4]: ./images/transform-tolerance-warning.png
+[image5]: ./images/map-update-warning.png
+
+
 The following instructions builds robot packages in ROS, from scratch. This is the methodology that I follow to successful build robots in ROS.
 
 
@@ -579,6 +592,221 @@ Note: As of this step, you won’t see the map in RViz.
 
 Localization: Adaptive Monte Carlo Localization Package 
 
-This modification to the [Monte Carlo Localization]()
+This modification to the [Monte Carlo Localization](https://github.com/IshmaelRogers/Localization/tree/master/MonteCarlo) dynamically adjusts the number of particles over a period of time as the robot navigates around in a map. This adaptive method offers a significant computational advantage over MCL. 
 
+The ROS [amclpackage](http://wiki.ros.org/amcl) implements this variant. We will integrate this package with our robot to localize it inside the provided map.
+
+Create a new launch file
+
+``
+$ cd /home/workspace/catkin_ws/src/hexapod0/launch/
+$ nano amcl.launch
+``
+
+The launch file has three nodes, one of which is for the amcl package. Copy the following into the launch file.
+
+
+```
+
+<?xml version="1.0"?>
+<launch>
+
+  <!-- Map server -->
+  <arg name="map_file" default="$(find udacity_bot)/maps/jackal_race.yaml"/>
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
+
+  <!-- Localization-->
+  <node pkg="amcl" type="amcl" name="amcl" output="screen">
+    <remap from="scan" to="udacity_bot/laser/scan"/>
+    <param name="odom_frame_id" value="odom"/>
+    <param name="odom_model_type" value="diff-corrected"/>
+    <param name="base_frame_id" value="robot_footprint"/>
+    <param name="global_frame_id" value="map"/>
+  </node>
   
+  ```
+  
+  First we need to load the provided map using a new node for the map_server package. Previousl, the ``robot_state_publisher`` helped build out the entire tf tree of the robot based on the URDF file. However, it did not extend that tree by linking in the 'map' frame. The amcl package does this automatically by linking the 'map' and 'odom' frames. 
+  
+  Next, we add a node that will launch the amcl package. The package has its own set of parameters that define its behavior in RViz and how everything relates to the robot and the provided map so that the robot can effectively localize itself. The amcl package reles entirely on the robot's odometry and laser scan data. 
+  1. `remap` the `scan` topic to the `hexapod0/laser/scan` topic on which the [hokuyo sensor](https://www.hokuyo-aut.jp/search/index.php?cate01=1) publishes the sensors data. We defined this topic previously when we added the gazebo plugin for the sensor. Then we add parameters and define values for the different reference frames such as odom or the map frames. The amcl package will now be able to take in laser and odom data and loclaize the robot.
+
+Navigation Stack 
+---
+
+To implement the [Navigation Stack](http://wiki.ros.org/navigation) we will work with the [move_base](http://wiki.ros.org/move_base) package that we can use to define a goal osition for the robot in the map and allow the robot to navigate to that goal position. 
+
+The move_base package is a powerful tool that utilizes a costmap where each part of the map is divided into which area is occupied, like walls or obstacles and which area is unoccupied. As the robot moves around, a local costmap, in relation to the global costmap, keeps getting updated allowing the package to define a contunout path for the robot to move along. 
+
+The package has some built-in corrective behaviors or maneuvers. Based on specific conditions like detecting a particular obstacle or if the robot is stuck, it will navigate the robot around the obstacle or rotate the robot until it finds a clear path ahead. 
+
+
+Below are images of the local and global costmaps. The gloabl costmap on the left, displays all the occupied areas based on the provided map. The local costmap on the right is only displaying what the laser sensor captures during that time period. 
+
+![alt text][image1]
+  
+Copy the following code into the above launch file
+
+
+```
+<!-- Move base -->
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <rosparam file="$(find udacity_bot)/config/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find udacity_bot)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find udacity_bot)/config/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find udacity_bot)/config/global_costmap_params.yaml" command="load" />
+    <rosparam file="$(find udacity_bot)/config/base_local_planner_params.yaml" command="load" />
+
+    <remap from="cmd_vel" to="cmd_vel"/>
+    <remap from="odom" to="odom"/>
+    <remap from="scan" to="udacity_bot/laser/scan"/>
+
+    <param name="base_global_planner" type="string" value="navfn/NavfnROS" />
+    <param name="base_local_planner" value="base_local_planner/TrajectoryPlannerROS"/>
+
+  </node>
+
+
+</launch>
+```
+
+The move_base package has its on set of required parameters that help it perform efficiently. We `remap` specific topics to allow them to take in input from odometry or laser data and also define some configuration files for parameters of definitions pertaining to the costmapsas well as the local plann that creates a path and navigates the robot along that path. 
+
+Add the configuration file 
+
+```
+
+$ cd ..
+$ mkdir config
+$ cd config
+
+```
+Add the following files from this [repo](https://github.com/udacity/RoboND-Localization-Project/tree/master/config) in the `config` folder:
+
+* `local_costmap_params.yaml`
+* `global_costmap_params.yaml`
+* `costmap_common_params.yaml`
+* `base_local_planner_params.yaml`
+
+The values in these files have some parameters and values defined for simplicity 
+
+Launch Setup
+---
+
+Now that we have robot, your map, your localization and navigation nodes
+
+```
+$ cd /home/catkin_ws/
+$ roslaunch hexapod0 hexapod0_world.launch
+```
+
+In a new terminal execute the following command:
+
+``
+$ roslaunch hexapod0 amc.launch 
+
+``
+
+Navigate to RViz and and select the required topics to visualize the robot and map. 
+
+* Select “odom” for fixed frame
+* Click the “Add” button and
+    * add “RobotModel”
+    * add “Map” and select first topic/map
+      * The second and third topics in the list will show the global costmap, and the local costmap. Both can be helpful to tune your parameters.
+    * add “PoseArray” and select topic /particlecloud
+      * This will display a set of arrows around the robo
+      
+      
+Note: Similar to the [EKF lab], we can save the above RViz setup in a configuration file and launch RViz with the same configuration every time. This will make the process more efficient for later!
+
+
+Each arrow is essentially a particle defining the pose of the robot that the localization package created. Our goal is to add/tune the parameters that will help localize the robot better and thereby improve the pose array.
+
+![alt text][image2]
+  
+
+In the RViz toolbar, 
+
+Select “2D Nav Goal” click anywhere else on the map and drag from there to define the goal position along with the orientation of the robot at the goal position.
+
+
+![alt text][image3] 
+
+In order to improve the robot's behavior we tune certain parameters. 
+
+# Paramater Tuning 
+
+The main focus of our project is to explore, add and tune parameters for the amcl and move_base packages. 
+
+Expected results
+---
+
+The `move_base` package will help navigate the robot to the goal position by creating or calculating a path from the initial position to the goal, and the `amcl` package will localize the robot. However we must define a method to evaluate the certainity of the algorithm about the robot's pose.
+
+The `PoseArray` in RVIz depicts a certain number of particles, respresented as arrows, around the robot.
+
+![alt text][image3] 
+
+
+The position and the direction the arrows point in, represent an uncertainty in the robot’s pose. This is a very convenient, and slightly subjective, method to understand how well the algorithm and tuned parameters are performing. Based on the parameters and what values are selected for them, as the robot moves forward in the map, the number of arrows should ideally reduce in number. The algorithm rules out some poses. This is the case for when the robot is closer to walls - it is more certain of its pose because of the laser data, as opposed to when it is roaming in an open area for too long.
+
+
+Robot Motion
+---
+
+In the previous section we used the "2D Nav Goal" button in RViz to make the robot navigate to the goal position. That did not work as intended and resulted in some warnings or errors. We'll look at some of these warnings and how to handle them. 
+
+Transform timeout
+-----
+
+There are three different types of maps that are being created/generated in RViz when we run `amcl.launch`.
+
+*  **The world map** - The visualization of the world or environment from Gazebo.
+* **The global costmap** - Created by the navigation stack/package. A costmap, which you will learn more about in future lessons, essentially divides the map into a grid where a cell could represent free space or an obstacle. The global costmap is used to generate a long-term path for the robot, such as the path to the goal position from the robot's starting position.
+*  **The local costmap** - The local costmap is used to generate a short-term path for the robot. For example, a path that attempts to align itself and the robot with the global path.
+
+The `tf` package, helps keep track of multiple coordinate frames, such as the transforms from these maps, along with any transforms corresponding to the robot and its sensors. Both the `amcl` and `move_base` packages or nodes require that this information be up-to-date and that it has as little a delay as possible between these transforms.
+
+![alt text][image4]
+
+The warning message in the above image is indicative of the maximum allowed delay to either be not defined or to be too low for the system to compensate for. This maximum amount of delay or latency allowed between transforms is defined by the `transform_tolerance` parameter.
+
+The first task is to add and tune this parameter for both the `amcl` node in `amcl.launch` file and for the `move_base` node in the `costmap_common_params.yaml` file. Tuning the value for this parameter is usually dependent on your system.
+
+Once the `transform_tolerance` variable defined and tuned properly, we should be able to visualize all the three maps in RViz without any issues, and the warning should disappear. Only to be replaced by a new warning.
+
+Map Update Loop
+---
+
+![alt text][image5]
+
+The warning seems to indicate that the map or costmaps are not getting updated fast enough. The update loop is taking longer than the desired frequency rate of 50 Hz or 0.02 seconds.
+
+How can we fix this? One way might be to get more processing power! But that's not always feasible. Since it's an issue related to the map or the costmaps, why don't we check out the configuration files (yaml) that we created for the move_base node and identify which parameters we can add or update to solve this problem.
+
+Here is a detailed list of parameters corresponding to costmaps in ROS - http://wiki.ros.org/costmap_2d that can help identify the necessary parameters.
+
+Necessaary Parameters:
+----
+
+* update freqency
+* publish_frequency 
+</ To be edited >
+As you might notice, a lot of the warnings you seem to be getting are because of system limitations. A larger and more detailed map will result in a large global costmap, and would use more resources. Apart from tuning the frequency with which your map is getting updated and published, you can also modify the dimension and resolution of your global and local costmaps.
+
+Modifying these parameters can help free up some resources, however, decreasing the resolution of your map by too much can lead to loss of valuable information too. For example, in case of small passages, low resolution might cause the obstacle regions to overlap in the local costmap, and the robot might not be able to find a path through the passage.
+
+Note: Modifying the above two parameters might help with the overall response, but it could potentially also help with ensuring that your robot is able to follow the defined local path. This might come in handy to experiment with later as well.
+Try running your project again, and define a goal position using the "2D Nav Goal" button in RViz, a short distance from your robot.
+
+Your robot should start moving! That's brilliant!
+
+But, it doesn't seem to be following the path and might be hitting the walls.
+
+In the next section, we will go through some more parameters that can help you tackle this problem and then move on to some of the parameters that could help improve your localization results as well. 
+<To be edited />
+
+Parameter Tuning - 2
+---
+
