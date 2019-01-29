@@ -270,11 +270,90 @@ Add the following to the launch file before ``</launch>``
 
 ``` bash
 <!--spawn a robot in gazebo world-->
-
 <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" 
 output="screen" args="-urdf -param robot_description -model udacity_bot"/>
+```
+
+The [gazebo_ros package](http://wiki.ros.org/gazebo_ros) spawns the model from the URDF that ```robot_description``` helps generate. Next, we launch everything and check if the robot loads up properly.
 
 ```
+$ cd /home/catkin_ws/
+$ catkin_make
+$ source devel/setup.bash
+$ roslaunch hexapod0 hexapod0_world.launch
+```
+Robot Actuation
+---
+
+Now we add wheels to the robot. In this example, we only include two wheels. Each wheel is represent as a link and is connected to the base link, previously referred to as chassis with a joint.
+
+First we create the links for each wheel using the specifications given below and add that to xacro file. For each whell we have a ``` collision```, ```intertial```, and ```visual``` element along with the following properties/definitions 
+
+* ```link name``` - "SIDE_wheel", where the SIDE is either left or right
+* ```geometry``` - "cylinder" with radius 0.1 and length 0.05 
+* ```origin``` for each element element - [0, 0, 0, 0, 1.5707, 1.5707]
+* ```mass``` of each wheel - "5"
+* ```inertia``` values are the same for the chassis 
+
+``` 
+ixx="0.1" ixy="0" ixz="0"
+iyy="0.1" iyz="0"
+izz="0.1"
+```
+Once the links are defined, we need to define the corresponding joints. The following code will create a joint between the left wheel (the child link) and the robot chassis (the parent link)
+
+```
+<joint type="continuous" name="left_wheel_hinge">
+    <origin xyz="0 0.15 0" rpy="0 0 0"/>
+    <child link="left_wheel"/>
+    <parent link="chassis"/>
+    <axis xyz="0 1 0" rpy="0 0 0"/>
+    <limit effort="10000" velocity="1000"/>
+    <dynamics damping="1.0" friction="1.0"/>
+  </joint>
+  ```
+  
+  The ``joint type`` is set to "continuous" and is similar to a revolute joint but has no limits on its rotation. It can rotate continuously about an axis.  The joint will have its own `axis` of rotation i.e some specific joint ``dynamics`` that correspond to the physcial properties of the joint like "friction", and certain ```limits```to enforce the maximum "effort" and "velocity" for that joint. The limits are useful constraints in regards to physical robot and can help create a more robust robot model in simulation. [click here](http://wiki.ros.org/pr2_controller_manager/safety_limits) to check out more resources to help understand these limits better. 
+  
+  We'll use the above as template to create the joint between the right wheel and the chassis by modifying the ``child link`` and ``position`` elements
+  
+ Use ``roslaunch`` as describe earlier
+  
+
+# Robot Sensors 
+
+Adding a camera
+---
+For this robot project we will add two sensors: a camera and a laser rangefinder. Let's start off by adding the camera with the following specifications in the ```hexapod0.xacro``` file:
+
+* ``link namne`` - camera
+* ``link origin`` - "[0,0,0,0,0,0]
+* ``joint name`` - "camera_joint"
+* ``joint origin`` - [0.2,0,0,0,0,0]
+* ``geometry`` - box with size "0.05"
+* ``mass`` - "0.1"
+* ``inertia`` - ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"
+* joint ``parent link`` - "chassis", and joint ``child link`` - "camera" 
+
+Each link has its on ``visual``, ``collision``, and ``inertial`` elements
+
+
+
+``` bash
+
+$ cd /home/workspace/catkin_ws/hexapod0/urdf
+$ nano hexapod0.xacro
+
+```
+
+Laser Rangefinder
+---
+
+ROS offer support more many different types of [sensors](http://wiki.ros.org/Sensors#A2D_range_finders)
+
+
+
+
 
 
 
