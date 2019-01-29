@@ -240,7 +240,7 @@ In order to launch our newly created robot we will need to create a new launch f
 
 The following code needs to be copied into the ```robot_desrcription.launch``` file in order to define a parameter called ``robot description`` which is used to set a single command use the [xacro package](http://wiki.ros.org/urdf/Tutorials/Using%20Xacro%20to%20Clean%20Up%20a%20URDF%20File) to generate the URDF from the xacro file.
 
-``` xml
+``` bash
 <?xml version="1.0"?>
 <launch>
 
@@ -252,7 +252,7 @@ The following code needs to be copied into the ```robot_desrcription.launch``` f
 
 Inside the ``launch`` folder we need to update ```hexapod0_world.launch``` so that Gazebo can load the UDRF
 
-```
+``` bash
 
 $ nano hexapod0_world.launch 
 
@@ -260,13 +260,21 @@ $ nano hexapod0_world.launch
 
 Add the following to the launch file after ```<launch>```
 
-```
+``` bash
 
 <include file = "$(find hexapod0)/launch/robot_description.launch"/>
 
 ````
 
+Add the following to the launch file before ``</launch>``
 
+``` bash
+<!--spawn a robot in gazebo world-->
+
+<node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" 
+output="screen" args="-urdf -param robot_description -model udacity_bot"/>
+
+```
 
 
 
