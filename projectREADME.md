@@ -349,9 +349,34 @@ $ nano hexapod0.xacro
 Laser Rangefinder
 ---
 
-ROS offer support more many different types of [sensors](http://wiki.ros.org/Sensors#A2D_range_finders)
+ROS offer support for many different types of [sensors](http://wiki.ros.org/Sensors#A2D_range_finders). The one for this lab is the Hokuyo rangefinder. Adding this sensors to the robot is done in a similar fashion.
+
+* ``link name``    - "hokuyo"
+* ``link origin``  - "[0, 0, 0, 0, 0, 0]" 
+* ``joint name``   - "hokuyo_joint"
+* ``joint origin`` - "[.15, 0, .1, 0, 0, 0]"
+* ``geometry``     - box with size "0.1" for <collision>, and a [mesh file](https://github.com/udacity/RoboND-Localization-Project/tree/master/meshes) file for <visual>
+*  ``mass``         - "0.1"
+* ``inertia``      - ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"
 
 
+ Also define the joint type, and the parent and child links!
+
+
+Mesh files deine the shape of the object or model that we are working with. There are basic shapes to work, but for more advanced designs we will utilize mesh files.
+
+Add the mesh file for the hokuyo sensor using the following tag -
+
+``
+<mesh filename= "package://hexapod0/meshes/hokuyo.dae"/>
+
+``
+The file above should be located in a folder called ``meshes`` that we can create in your package folder ``hexapod0`` the [mesh file](https://github.com/udacity/RoboND-Localization-Project/tree/master/meshes) is located here.
+
+Gazebo Plugins
+---
+
+Now that we have added the sensors to robot, we need to define how the sensors actually capture data. Additionally, we define how the robot moves in a simulated environment. Gazebo, provides tools that allow us to create or use plugins that help utilize all available gazebo functionality in order to implmwent specific use-cases for specific models
 
 
 
