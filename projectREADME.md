@@ -252,19 +252,19 @@ The following code needs to be copied into the ```robot_desrcription.launch``` f
 
 Inside the ``launch`` folder we need to update ```hexapod0_world.launch``` so that Gazebo can load the UDRF
 
-`` xml
+`xml
 
 $ nano hexapod0_world.launch 
 
-``
+`
 
 Add the following to the launch file after ```<launch>```
 
-`` xml 
+`XML
 
 <include file = "$(find hexapod0)/launch/robot_description.launch"/>
 
-``
+`
 
 
 
