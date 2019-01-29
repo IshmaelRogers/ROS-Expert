@@ -378,7 +378,71 @@ Gazebo Plugins
 
 Now that we have added the sensors to robot, we need to define how the sensors actually capture data. Additionally, we define how the robot moves in a simulated environment. Gazebo, provides tools that allow us to create or use plugins that help utilize all available gazebo functionality in order to implmwent specific use-cases for specific models
 
+The xacro file, ``udacity_bot.gazebo`` can be found in the [github repo](https://github.com/udacity/RoboND-Localization-Project/tree/master/urdf). It needs to be renamed to hexapod0.gazebo and placed in the ``udrf`` folder of the package.
+
+The robot in this project has two wheel. Therefore we will use, a Differential Drive Controller. Below is an overview of how this plugin is defined in the ``.gazebo``
+
+`` xml
+<gazebo>
+    <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
+      <legacyMode>false</legacyMode>
+      <alwaysOn>true</alwaysOn>
+      <updateRate>10</updateRate>
+      <leftJoint>left_wheel_hinge</leftJoint>
+      <rightJoint>right_wheel_hinge</rightJoint>
+      <wheelSeparation>0.4</wheelSeparation>
+      <wheelDiameter>0.2</wheelDiameter>
+      <torque>10</torque>
+      <commandTopic>cmd_vel</commandTopic>
+      <odometryTopic>odom</odometryTopic>
+      <odometryFrame>odom</odometryFrame>
+      <robotBaseFrame>robot_footprint</robotBaseFrame>
+    </plugin>
+  </gazebo>
+  
+``
+
+``libgazebo_ros_diff_drive.so`` is the shared object file created from compiling some C++ code. THe plugin takes in infomration specific tp the tpbot's model such as wheel sepatation, joint names and more, then calculates and publishes the robot's odometery information to the topics that we are specifying above (the odom topic). The controller allows us to send velocity commands to the robot so that it can move in a specific direction. Refer to this link for the [source code](https://bitbucket.org/osrf/gazebo/src/afe08834571835008fa7419f1feba5b7f89b9d62/plugins/DiffDrivePlugin.cc?at=gazebo7&fileviewer=file-view-default) 
+
+
+Gazebo has many plugins availble. Therefore we use preexisting plugins for the [camera sensor](http://gazebosim.org/tutorials?tut=ros_gzplugins#Camera) and hokuyo sensor. 
+
+We need to define topics for each sensor and where they publish information or data. For the camera, ``image_raw`` topic 
+
+```
+<imageTopicName>image_raw</imageTopicName>
+
+```
+
+For the laser, its ```udacity_bot/laser/scan</topicName> 
+
+```
+<topicName>/udacity_bot/laser/scan</topicName>
+```
+
+Test the update model in Gazebo after the plugins are imported by the UDRF.
+
+```
+$ cd /home/workspace/catkin_ws/src/udacity_bot/urdf
+$ nano udacity_bot.xacro
+```
+
+Add the following to the top of the file right before the definition of the ```robot_footprint``` link 
+
+``` xacro
+<xacro:include filename="$(find udacity_bot)/urdf/udacity_bot.gazebo" />
+```
+
+Run the launch file to test the model
+
+```
+$ roslaunch hexapod0 hexapod.launch
+```
 
 
 
+
+
+
+  
 
